@@ -1,0 +1,65 @@
+﻿@page "/Customer/Edit/{id}"
+
+@using RazorPages.Samples.Web
+@using RazorPages.Samples.Web.Data
+@model Customer
+@inherits EditCustomer
+
+@functions {
+    public async Task<IActionResult> OnGetAsync(int id)
+    {
+        CurrentCustomer = GetCustomer(id);
+        return View(CurrentCustomer);
+    }
+
+    public async Task<IActionResult> OnPost(Customer customer)
+    {
+        if (ModelState.IsValid)
+        {
+            UpdateCustomer(customer);
+            SuccessMessage = $"Customer {customer.Id} successfully edited!";
+			return Redirect("/");
+        }
+        
+        // Model errors, populate customer list and show errors
+        CurrentCustomer = GetCustomer(customer.Id);
+        ErrorMessage = "Please correct the errors and try again";
+        return View();
+    }
+
+    public Customer CurrentCustomer { get; set; }
+    public string SuccessMessage
+    {
+        get { return (string)TempData[nameof(SuccessMessage)]; }
+        set { TempData[nameof(SuccessMessage)] = value; }
+    }
+    public bool ShowSuccessMessage => !string.IsNullOrEmpty(SuccessMessage);
+    public string ErrorMessage
+    {
+        get { return (string)TempData[nameof(ErrorMessage)]; }
+        set { TempData[nameof(ErrorMessage)] = value; }
+    }
+    public bool ShowErrorMessage => !string.IsNullOrEmpty(ErrorMessage);
+}
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "All about interesting people";
+}
+
+<h2>Edit Customer</h2>
+@if (ShowSuccessMessage || ShowErrorMessage) {
+    <div class="alert alert-@(ShowSuccessMessage ? "success" : "danger") alert-dismissable" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="close"><span aria-hidden="true">&times;</span></button>
+        @(ShowSuccessMessage ? SuccessMessage : ErrorMessage)
+    </div>    
+}
+<form method="post" class="form-inline">
+    <div class="form-group">
+		<label asp-for="Name"></label>
+        <input asp-for="Name" class="form-control" />
+    </div>
+    <input type="submit" value="Save" class="btn btn-primary" />
+	<a class="btn btn-default" href="/">Cancel</a>
+    <div asp-validation-summary="@ValidationSummary.All" class="text-danger"></div>
+</form>

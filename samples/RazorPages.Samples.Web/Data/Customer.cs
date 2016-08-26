@@ -1,7 +1,6 @@
-﻿
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace RazorPages.Samples.Web
+namespace RazorPages.Samples.Web.Data
 {
     public class Customer
     {
