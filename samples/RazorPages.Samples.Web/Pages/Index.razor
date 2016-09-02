@@ -1,4 +1,4 @@
-﻿@page
+﻿@page "{deleteId?}"
 @inherits Index
 
 @{
@@ -23,7 +23,7 @@
                 <tr>
                     <td>@Html.DisplayFor(_ => customer.Id)</td>
                     <td>@Html.DisplayFor(_ => customer.Name)</td>
-                    <td><button type="submit" name="deleteId" value="@customer.Id" class="btn btn-link">Delete</button></td>
+                    <td><button type="submit" formaction="@customer.Id" class="btn btn-link">Delete</button></td>
                 </tr>
                 }
                 @if (!ExistingCustomers.Any())

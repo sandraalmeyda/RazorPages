@@ -46,11 +46,11 @@ namespace RazorPages.Samples.Web.Pages
             ExistingCustomers = Db.Customers.AsNoTracking().ToList();
         }
 
-        public async Task<IActionResult> OnPost(int? deleteId)
+        public async Task<IActionResult> OnPostAsync(int? deleteId)
         {
             if (deleteId.HasValue)
             {
-                _logger.LogInformation("Performing delete of customer with ID {customerId}", deleteId.Value);
+                _logger.LogInformation("Performing delete of customer with ID {customerId}", deleteId);
                 Db.Remove(new Customer { Id = deleteId.Value });
                 Db.SaveChanges();
                 SuccessMessage = $"Customer {deleteId} deleted successfully!";
