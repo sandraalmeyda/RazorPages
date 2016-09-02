@@ -31,6 +31,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
         private readonly ActionContext _actionContext;
         private readonly CompiledPageActionDescriptor _actionDescriptor;
         private readonly IList<IValueProviderFactory> _valueProviderFactories;
+        private readonly TempDataPropertyProvider _tempDataPropertyProvider;
 
         private readonly IFilterMetadata[] _filters;
         private FilterCursor _cursor; // Mutable struct. DO NOT make this readonly
@@ -50,7 +51,8 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
             IFilterMetadata[] filters,
             IReadOnlyList<IValueProviderFactory> valueProviderFactories,
             ActionContext actionContext,
-            CompiledPageActionDescriptor actionDescriptor)
+            CompiledPageActionDescriptor actionDescriptor,
+            TempDataPropertyProvider tempDataPropertyProvider)
         {
             _diagnosticSource = diagnosticSource;
             _logger = logger;
@@ -63,6 +65,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
             _valueProviderFactories = new CopyOnWriteList<IValueProviderFactory>(valueProviderFactories);
             _actionContext = actionContext;
             _actionDescriptor = actionDescriptor;
+            _tempDataPropertyProvider = tempDataPropertyProvider;
 
             _cursor = new FilterCursor(_filters);
         }
@@ -471,6 +474,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
 
             var page = (Page)_factory.CreatePage(pageContext);
 
+            var tempDataPropertyTracker = _tempDataPropertyProvider.LoadAndTrackChanges(page, page.TempData);
             IActionResult result = null;
 
             var handler = _selector.Select(pageContext);
@@ -486,6 +490,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
             }
 
             await result.ExecuteResultAsync(pageContext);
+            tempDataPropertyTracker.SaveChanges();
         }
 
         private async Task InvokeResultAsync(IActionResult result)

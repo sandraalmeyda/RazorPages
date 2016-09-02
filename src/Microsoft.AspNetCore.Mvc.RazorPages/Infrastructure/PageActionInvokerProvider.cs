@@ -26,6 +26,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
         private readonly IModelMetadataProvider _metadataProvider;
         private readonly ITempDataDictionaryFactory _tempDataFactory;
         private readonly IOptions<MvcViewOptions> _viewOptions;
+        private readonly TempDataPropertyProvider _pagePersistedPropertyProvider;
 
         public PageActionInvokerProvider(
             IPageFactory factory,
@@ -37,7 +38,8 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
             IModelMetadataProvider metadataProvider,
             ITempDataDictionaryFactory tempDataFactory,
             IOptions<MvcOptions> options,
-            IOptions<MvcViewOptions> viewOptions)
+            IOptions<MvcViewOptions> viewOptions,
+            TempDataPropertyProvider pagePersistedPropertyProvider)
         {
             _factory = factory;
             _selector = selector;
@@ -46,6 +48,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
             _metadataProvider = metadataProvider;
             _tempDataFactory = tempDataFactory;
             _viewOptions = viewOptions;
+            _pagePersistedPropertyProvider = pagePersistedPropertyProvider;
 
             _filterProviders = filterProviders.OrderBy(fp => fp.Order).ToArray();
             _logger = loggerFactory.CreateLogger<PageActionInvoker>();
@@ -116,7 +119,8 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
                     filters,
                     _valueProviderFactories,
                     context.ActionContext,
-                    compiledActionDescriptor);
+                    compiledActionDescriptor,
+                    _pagePersistedPropertyProvider);
             }
         }
 
