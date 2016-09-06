@@ -20,10 +20,10 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages
 
         public IDictionary<PropertyInfo, object> LoadPropertyState(object subject, ITempDataDictionary tempData)
         {
-            var pageProperties = GetPageProperties(subject);
+            var properties = GetSubjectProperties(subject);
             var result = new Dictionary<PropertyInfo, object>();
 
-            foreach (var property in pageProperties)
+            foreach (var property in properties)
             {
                 var value = tempData[_prefix + property.Name];
 
@@ -47,7 +47,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages
             }
         }
 
-        private IEnumerable<PropertyInfo> GetPageProperties(object subject)
+        private IEnumerable<PropertyInfo> GetSubjectProperties(object subject)
         {
             return _subjectProperties.GetOrAdd(subject.GetType(), subjectType =>
             {
