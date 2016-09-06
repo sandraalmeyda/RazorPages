@@ -31,7 +31,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
         private readonly ActionContext _actionContext;
         private readonly CompiledPageActionDescriptor _actionDescriptor;
         private readonly IList<IValueProviderFactory> _valueProviderFactories;
-        private readonly IPersistedPagePropertyProvider _persistedPagePropertyProvider;
+        private readonly ITempDataPropertyProvider _persistedPagePropertyProvider;
 
         private readonly IFilterMetadata[] _filters;
         private FilterCursor _cursor; // Mutable struct. DO NOT make this readonly
@@ -52,7 +52,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
             IReadOnlyList<IValueProviderFactory> valueProviderFactories,
             ActionContext actionContext,
             CompiledPageActionDescriptor actionDescriptor,
-            IPersistedPagePropertyProvider persistedPagePropertyProvider)
+            ITempDataPropertyProvider persistedPagePropertyProvider)
         {
             _diagnosticSource = diagnosticSource;
             _logger = logger;
@@ -474,7 +474,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
 
             var page = (Page)_factory.CreatePage(pageContext);
 
-            var persistedPagePropertyTracker = _persistedPagePropertyProvider.LoadAndTrackChanges(page);
+            var persistedPagePropertyTracker = _persistedPagePropertyProvider.LoadAndTrackChanges(page, page.TempData);
             IActionResult result = null;
 
             var handler = _selector.Select(pageContext);
