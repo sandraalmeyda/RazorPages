@@ -8,11 +8,11 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages
     public class TempDataPropertyTracker
     {
         private readonly object _subject;
-        private readonly Action<object, ITempDataDictionary, PropertyInfo, object> _saveProperty;
-        private readonly IDictionary<PropertyInfo, object> _trackedProperties = new Dictionary<PropertyInfo, object>();
         private readonly ITempDataDictionary _tempData;
+        private readonly IDictionary<PropertyInfo, object> _trackedProperties = new Dictionary<PropertyInfo, object>();
+        private readonly Action< ITempDataDictionary, PropertyInfo, object> _saveProperty;
 
-        public TempDataPropertyTracker(object subject, ITempDataDictionary tempData, IDictionary<PropertyInfo, object> trackedProperties, Action<object, ITempDataDictionary, PropertyInfo, object> saveProperty)
+        public TempDataPropertyTracker(object subject, ITempDataDictionary tempData, IDictionary<PropertyInfo, object> trackedProperties, Action<ITempDataDictionary, PropertyInfo, object> saveProperty)
         {
             _subject = subject;
             _tempData = tempData;
@@ -27,7 +27,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages
                 var newValue = property.Key.GetValue(_subject);
                 if (newValue != null && newValue != property.Value)
                 {
-                    _saveProperty(_subject, _tempData, property.Key, newValue);
+                    _saveProperty(_tempData, property.Key, newValue);
                 }
             }
         }

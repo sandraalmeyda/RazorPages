@@ -18,7 +18,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages
             return new TempDataPropertyTracker(subject, tempData, LoadPropertyState(subject, tempData), SavePropertyValue);
         }
 
-        public IDictionary<PropertyInfo, object> LoadPropertyState(object subject, ITempDataDictionary tempData)
+        private IDictionary<PropertyInfo, object> LoadPropertyState(object subject, ITempDataDictionary tempData)
         {
             var properties = GetSubjectProperties(subject);
             var result = new Dictionary<PropertyInfo, object>();
@@ -39,7 +39,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages
             return result;
         }
 
-        private void SavePropertyValue(object subject, ITempDataDictionary tempData, PropertyInfo property, object value)
+        private void SavePropertyValue(ITempDataDictionary tempData, PropertyInfo property, object value)
         {
             if (value != null)
             {
