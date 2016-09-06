@@ -8,7 +8,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages
 {
     public class TempDataPersistedPagePropertyProvider : IPersistedPagePropertyProvider
     {
-        private static readonly string _prefix = "Page_";
+        private static readonly string _prefix = "PersistedProperty-";
         private ConcurrentDictionary<Type, IEnumerable<PropertyInfo>> _pageProperties =
             new ConcurrentDictionary<Type, IEnumerable<PropertyInfo>>();
 
@@ -28,6 +28,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages
 
                 result[property] = value;
 
+                // TODO: Clarify what behavior should be for null values here
                 if (value != null && property.PropertyType.IsAssignableFrom(value.GetType()))
                 {
                     property.SetValue(page, value);
@@ -52,9 +53,14 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages
                 var properties = pageType.GetRuntimeProperties()
                     .Where(pi => pi.GetCustomAttribute<TempDataAttribute>() != null);
 
-                if (properties.Any(pi => !(pi.SetMethod.IsPublic && pi.GetMethod.IsPublic)))
+                if (properties.Any(pi => !(pi.SetMethod != null && pi.SetMethod.IsPublic && pi.GetMethod != null && pi.GetMethod.IsPublic)))
                 {
                     throw new InvalidOperationException("Persisted page properties must have a public getter and setter.");
+                }
+
+                if (properties.Any(pi => !(pi.PropertyType.GetTypeInfo().IsPrimitive || pi.PropertyType == typeof(string))))
+                {
+                    throw new InvalidOperationException("Persisted page properties must be declared as primitive types or string only.");
                 }
 
                 return properties;
