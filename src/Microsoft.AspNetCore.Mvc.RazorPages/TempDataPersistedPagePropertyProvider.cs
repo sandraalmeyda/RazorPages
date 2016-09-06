@@ -32,15 +32,28 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages
 
             foreach (var property in pageProperties)
             {
-                page.TempData[_prefix + property.Name] = property.GetValue(page);
+                var value = property.GetValue(page);
+                if (value != null)
+                {
+                    page.TempData[_prefix + property.Name] = value;
+                }
             }
         }
 
         private IEnumerable<PropertyInfo> GetPageProperties(Page page)
         {
             return _pageProperties.GetOrAdd(page.GetType(), pageType =>
-                pageType.GetRuntimeProperties()
-                    .Where(pi => pi.GetCustomAttribute<TempDataAttribute>() != null));
+            {
+                var properties = pageType.GetRuntimeProperties()
+                    .Where(pi => pi.GetCustomAttribute<TempDataAttribute>() != null);
+
+                if (properties.Any(pi => !(pi.SetMethod.IsPublic && pi.GetMethod.IsPublic)))
+                {
+                    throw new InvalidOperationException("Persisted page properties must have a public getter and setter.");
+                }
+
+                return properties;
+            });
         }
     }
 }

@@ -24,20 +24,14 @@ namespace RazorPages.Samples.Web.Pages
         public IEnumerable<Customer> ExistingCustomers { get; set; }
 
         public Customer Customer { get; set; } = new Customer();
-
-        public string SuccessMessage
-        {
-            get { return (string)TempData[nameof(SuccessMessage)]; }
-            set { TempData[nameof(SuccessMessage)] = value; }
-        }
+        
+        [TempData]
+        public string SuccessMessage { get; set; }
 
         public bool ShowSuccessMessage => !string.IsNullOrEmpty(SuccessMessage);
 
-        public string ErrorMessage
-        {
-            get { return (string)TempData[nameof(ErrorMessage)]; }
-            set { TempData[nameof(ErrorMessage)] = value; }
-        }
+        [TempData]
+        public string ErrorMessage { get; set; }
 
         public bool ShowErrorMessage => !string.IsNullOrEmpty(ErrorMessage);
 
