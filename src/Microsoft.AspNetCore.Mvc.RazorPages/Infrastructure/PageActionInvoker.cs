@@ -31,7 +31,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
         private readonly ActionContext _actionContext;
         private readonly CompiledPageActionDescriptor _actionDescriptor;
         private readonly IList<IValueProviderFactory> _valueProviderFactories;
-        private readonly IPersistedPagePropertyProvider _pagePersistedPropertyProvider;
+        private readonly IPersistedPagePropertyProvider _persistedPagePropertyProvider;
 
         private readonly IFilterMetadata[] _filters;
         private FilterCursor _cursor; // Mutable struct. DO NOT make this readonly
@@ -52,7 +52,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
             IReadOnlyList<IValueProviderFactory> valueProviderFactories,
             ActionContext actionContext,
             CompiledPageActionDescriptor actionDescriptor,
-            IPersistedPagePropertyProvider pagePersistedPropertyProvider)
+            IPersistedPagePropertyProvider persistedPagePropertyProvider)
         {
             _diagnosticSource = diagnosticSource;
             _logger = logger;
@@ -65,7 +65,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
             _valueProviderFactories = new CopyOnWriteList<IValueProviderFactory>(valueProviderFactories);
             _actionContext = actionContext;
             _actionDescriptor = actionDescriptor;
-            _pagePersistedPropertyProvider = pagePersistedPropertyProvider;
+            _persistedPagePropertyProvider = persistedPagePropertyProvider;
 
             _cursor = new FilterCursor(_filters);
         }
@@ -474,7 +474,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
 
             var page = (Page)_factory.CreatePage(pageContext);
 
-            _pagePersistedPropertyProvider.LoadPagePropertyState(page);
+            var persistedPagePropertyTracker = _persistedPagePropertyProvider.LoadAndTrackChanges(page);
             IActionResult result = null;
 
             var handler = _selector.Select(pageContext);
@@ -490,7 +490,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
             }
 
             await result.ExecuteResultAsync(pageContext);
-            _pagePersistedPropertyProvider.SavePagePropertyState(page);
+            persistedPagePropertyTracker.SaveChanges();
         }
 
         private async Task InvokeResultAsync(IActionResult result)

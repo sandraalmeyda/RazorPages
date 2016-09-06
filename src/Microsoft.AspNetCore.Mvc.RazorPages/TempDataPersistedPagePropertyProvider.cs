@@ -12,31 +12,36 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages
         private ConcurrentDictionary<Type, IEnumerable<PropertyInfo>> _pageProperties =
             new ConcurrentDictionary<Type, IEnumerable<PropertyInfo>>();
 
-        public void LoadPagePropertyState(Page page)
+        public PersistedPagePropertyTracker LoadAndTrackChanges(Page page)
+        {
+            return new PersistedPagePropertyTracker(page, LoadPagePropertyState(page), SavePropertyValue);
+        }
+
+        public IDictionary<PropertyInfo, object> LoadPagePropertyState(Page page)
         {
             var pageProperties = GetPageProperties(page);
+            var result = new Dictionary<PropertyInfo, object>();
 
             foreach (var property in pageProperties)
             {
                 var value = page.TempData[_prefix + property.Name];
+
+                result[property] = value;
+
                 if (value != null && property.PropertyType.IsAssignableFrom(value.GetType()))
                 {
                     property.SetValue(page, value);
                 }
             }
+
+            return result;
         }
 
-        public void SavePagePropertyState(Page page)
+        private void SavePropertyValue(Page page, PropertyInfo property, object value)
         {
-            var pageProperties = GetPageProperties(page);
-
-            foreach (var property in pageProperties)
+            if (value != null)
             {
-                var value = property.GetValue(page);
-                if (value != null)
-                {
-                    page.TempData[_prefix + property.Name] = value;
-                }
+                page.TempData[_prefix + property.Name] = value;
             }
         }
 
