@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc.ViewFeatures;
 
 namespace Microsoft.AspNetCore.Mvc.RazorPages
 {
-    public class TempDataPropertyProvider : ITempDataPropertyProvider
+    public class TempDataPropertyProvider
     {
         private static readonly string _prefix = "TempDataProperty-";
         private ConcurrentDictionary<Type, IEnumerable<PropertyInfo>> _subjectProperties =

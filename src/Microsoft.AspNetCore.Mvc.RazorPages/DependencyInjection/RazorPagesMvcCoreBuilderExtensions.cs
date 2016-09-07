@@ -84,7 +84,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.TryAddEnumerable(ServiceDescriptor.Transient<IConfigureOptions<RazorPagesOptions>, DefaultRazorPagesOptionsSetup>());
 
-            services.TryAddSingleton<ITempDataPropertyProvider, TempDataPropertyProvider>();
+            services.TryAddSingleton<TempDataPropertyProvider>();
         }
     }
 }

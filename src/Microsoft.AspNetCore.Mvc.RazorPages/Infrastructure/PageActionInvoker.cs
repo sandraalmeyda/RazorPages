@@ -31,7 +31,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
         private readonly ActionContext _actionContext;
         private readonly CompiledPageActionDescriptor _actionDescriptor;
         private readonly IList<IValueProviderFactory> _valueProviderFactories;
-        private readonly ITempDataPropertyProvider _tempDataPropertyProvider;
+        private readonly TempDataPropertyProvider _tempDataPropertyProvider;
 
         private readonly IFilterMetadata[] _filters;
         private FilterCursor _cursor; // Mutable struct. DO NOT make this readonly
@@ -52,7 +52,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
             IReadOnlyList<IValueProviderFactory> valueProviderFactories,
             ActionContext actionContext,
             CompiledPageActionDescriptor actionDescriptor,
-            ITempDataPropertyProvider tempDataPropertyProvider)
+            TempDataPropertyProvider tempDataPropertyProvider)
         {
             _diagnosticSource = diagnosticSource;
             _logger = logger;
