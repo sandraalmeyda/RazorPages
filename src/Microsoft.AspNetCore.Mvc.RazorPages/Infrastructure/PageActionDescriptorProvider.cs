@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.AspNetCore.Mvc.Abstractions;
+using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.RazorPages.Razevolution;
 using Microsoft.AspNetCore.Mvc.Routing;
@@ -17,13 +18,16 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
     {
         private readonly RazorProject _project;
         private readonly MvcOptions _options;
+        private readonly RazorPagesOptions _pagesOptions;
 
         public PageActionDescriptorProvider(
             RazorProject project,
-            IOptions<MvcOptions> options)
+            IOptions<MvcOptions> options,
+            IOptions<RazorPagesOptions> pagesOptions)
         {
             _project = project;
             _options = options.Value;
+            _pagesOptions = pagesOptions.Value;
         }
 
         public int Order { get; set; }
@@ -37,7 +41,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
                     // Pages like _PageImports should not be routable.
                     continue;
                 }
-
+                
                 AddActionDescriptors(context.Results, item);
             }
         }
@@ -48,29 +52,53 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
 
         private void AddActionDescriptors(IList<ActionDescriptor> actions, RazorProjectItem item)
         {
-            var template = GetRouteTemplate(item);
+            var model = new PageModel(item.CominedPath, item.Path);
 
-            var filters = new List<FilterDescriptor>(_options.Filters.Count);
+            model.Selectors.Add(new SelectorModel()
+            {
+                AttributeRouteModel = new AttributeRouteModel()
+                {
+                    Template = GetRouteTemplate(item),
+                }
+            });
+
+            foreach (var convention in _pagesOptions.Conventions)
+            {
+                convention.Apply(model);
+            }
+
+            var filters = new List<FilterDescriptor>(_options.Filters.Count + model.Filters.Count);
             for (var i = 0; i < _options.Filters.Count; i++)
             {
                 filters.Add(new FilterDescriptor(_options.Filters[i], FilterScope.Global));
             }
 
-            actions.Add(new PageActionDescriptor()
+            for (var i = 0; i < model.Filters.Count; i++)
             {
-                AttributeRouteInfo = new AttributeRouteInfo()
+                filters.Add(new FilterDescriptor(model.Filters[i], FilterScope.Action));
+            }
+
+            foreach (var selector in model.Selectors)
+            {
+                actions.Add(new PageActionDescriptor()
                 {
-                    Template = template,
-                },
-                DisplayName = $"Page: {item.Path}",
-                FilterDescriptors = filters,
-                RelativePath = item.CominedPath,
-                RouteValues = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "page", item.PathWithoutExtension },
-                },
-                ViewEnginePath = item.Path,
-            });
+                    AttributeRouteInfo = new AttributeRouteInfo()
+                    {
+                        Name = selector.AttributeRouteModel.Name,
+                        Order = selector.AttributeRouteModel.Order ?? 0,
+                        Template = selector.AttributeRouteModel.Template,
+                    },
+                    DisplayName = $"Page: {item.Path}",
+                    FilterDescriptors = filters,
+                    Properties = new Dictionary<object, object>(model.Properties),
+                    RelativePath = item.CominedPath,
+                    RouteValues = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                    {
+                        { "page", item.PathWithoutExtension },
+                    },
+                    ViewEnginePath = item.Path,
+                });
+            }
         }
 
         private IEnumerable<RazorProjectItem> EnumerateItems()

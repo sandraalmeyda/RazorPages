@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.Extensions.FileProviders;
@@ -11,6 +12,8 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages
     public class RazorPagesOptions
     {
         public CSharpCompilationOptions CompilationOptions { get; } = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary);
+
+        public IList<IPageModelConvention> Conventions { get; } = new List<IPageModelConvention>();
 
         public string DefaultNamespace { get; set; }
 
