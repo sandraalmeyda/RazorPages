@@ -24,7 +24,7 @@ namespace RazorPages.Samples.Web.Pages
         public IEnumerable<Customer> ExistingCustomers { get; set; }
 
         public Customer Customer { get; set; } = new Customer();
-        
+
         [TempData]
         public string SuccessMessage { get; set; }
 
@@ -35,22 +35,13 @@ namespace RazorPages.Samples.Web.Pages
 
         public bool ShowErrorMessage => !string.IsNullOrEmpty(ErrorMessage);
 
-        public async Task OnGetAsync()
+        public void OnGet()
         {
             ExistingCustomers = Db.Customers.AsNoTracking().ToList();
         }
 
-        public async Task<IActionResult> OnPostAsync(int? deleteId)
+        public async Task<IActionResult> OnPostAsync()
         {
-            if (deleteId.HasValue)
-            {
-                _logger.LogInformation("Performing delete of customer with ID {customerId}", deleteId);
-                Db.Remove(new Customer { Id = deleteId.Value });
-                Db.SaveChanges();
-                SuccessMessage = $"Customer {deleteId} deleted successfully!";
-                return Redirect("/");
-            }
-
             await TryUpdateModelAsync(Customer, nameof(Customer));
 
             if (!ModelState.IsValid)
@@ -62,8 +53,20 @@ namespace RazorPages.Samples.Web.Pages
             }
 
             Db.Add(Customer);
-            Db.SaveChanges();
+            await Db.SaveChangesAsync();
+
             SuccessMessage = $"Customer {Customer.Id} successfully created!";
+            return Redirect("/");
+        }
+
+        public async Task<IActionResult> OnPostDeleteAsync(int id)
+        {
+            _logger.LogInformation("Performing delete of customer with ID {customerId}", id);
+
+            Db.Remove(new Customer { Id = id });
+            await Db.SaveChangesAsync();
+
+            SuccessMessage = $"Customer {id} deleted successfully!";
             return Redirect("/");
         }
     }
